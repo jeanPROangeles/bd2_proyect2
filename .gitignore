@@ -125,5 +125,6 @@ dmypy.json
 .pyre/
 
 data_aux/
+data_in/
 *.json
 data.txt
