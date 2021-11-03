@@ -1,8 +1,9 @@
-path_file_data = "data/data.txt"
-path_data_in = "data/data_in/"
-path_stop_list = "data/stoplist.txt"
-MAX_TERMS_IN_MAP = 500
-path_data_aux = "data/data_aux/"
-path_file_aux = "data/data_aux/aux"
+path_data = "data/"
+path_file_data = path_data + "data.json"
+path_data_in = path_data + "data_in/"
+path_stop_list = path_data + "stoplist.txt"
+MAX_TERMS_IN_MAP = 1000000
+path_data_aux = path_data + "data_aux/"
+path_file_aux = path_data + "data_aux/aux"
 path_file_aux_end = ".json"
-path_norm_doc = "data/norm.json"
+path_norm_doc = path_data + "norm.json"
