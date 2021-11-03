@@ -1,4 +1,4 @@
-from numpy import sqrt
+from numpy import sqrt, square
 from lib import *
 import json
 import io
@@ -65,6 +65,7 @@ class DataRecovery():
         local_map = {}
         size_of_local_map = 0
         id_file_aux = 1
+        size = 0
         print("Generando archivos auxiliares")
         for f in listdir(path_data_in):
             file_in = join(path_data_in, f)
@@ -100,15 +101,19 @@ class DataRecovery():
                             if 'covid' in tweet_word and tweet_word[0] != '#':
                                 tweet_word = 'covid'
                             ###
+                            if tweet_word == "":
+                                continue
                             tweet_word_root = self.__getStem(tweet_word)
                             if tweet_word_root in local_map:
                                 if tweet_id in local_map[tweet_word_root]:
                                     local_map[tweet_word_root][tweet_id] = local_map[tweet_word_root][tweet_id] + 1
                                 else:
+                                    size = size + 1
                                     local_map[tweet_word_root][tweet_id] = 1
                                     size_of_local_map = size_of_local_map + \
                                         len(str(tweet_id)) + 6
                             else:
+                                size = size + 1
                                 local_map[tweet_word_root] = {tweet_id: 1}
                                 size_of_local_map = size_of_local_map + \
                                     len(str(tweet_id)) + 1 + \
@@ -147,11 +152,12 @@ class DataRecovery():
             pq.put((read_buffer[i][0], i))
             buffer_remaining.append(i)
         # TODO: Añadir bufer de lectura de data/data.json
+        size2 = 0
         with open(path_file_data, 'a', encoding="utf-8") as file:
             n = 0
             while not pq.empty():
                 # Ver buffers y remaining buffers
-                ''' 
+                '''
                 for pair in read_buffer:
                     print(pair[0])
                 for id in buffer_remaining:
@@ -200,11 +206,132 @@ class DataRecovery():
                                 line)
                             pq.put((read_buffer[cur_ind_2][0], cur_ind_2))
                 term_dic["idf"] = log10(self.N/len(term_dic["docs"]))
+                size2 = size2 + len(term_dic["docs"])
                 file.write(json.dumps(term_dic, ensure_ascii=False))
                 file.write("\n")
                 n = n + 1
             #print("n: ", n)
             file.close()
+        print(str(n) +
+              " términos encontrados")
+        print(str(self.N) +
+              " tweets procesados")
+        # Comprobación
+        '''
+        size3 = 0
+        with open(path_file_data, 'r', encoding="utf-8") as file:
+            for term in file:
+                term = term.rstrip()
+                json_term = json.load(io.StringIO(term))
+                docs = json_term.get("docs")
+                size3 = size3 + len(docs)
+            file.close()
+        print("Final:")
+        print("size:", size)
+        print("size2:", size2)
+        print("size3:", size3)
+        print("N:", self.N)
+        '''
+
+    def __search_term_in_data(self, query_map):
+        map_to_return = {}
+        with open(path_file_data, 'r', encoding="utf-8") as file:
+            for line in file:
+                line = line.rstrip()
+                json_term = json.load(io.StringIO(line))
+                if json_term.get("name") in query_map:
+                    map_to_return[json_term.get("name")] = dict(json_term)
+            file.close()
+        return map_to_return
+
+    def __search_tweet_norm(self, list_tweet_id):
+        map_to_return = {}
+        with open(path_norm_doc, 'r', encoding="utf-8") as file:
+            for line in file:
+                line = line.rstrip()
+                json_term = json.load(io.StringIO(line))
+                keys = list(json_term.keys())
+                if keys[0] in list_tweet_id:
+                    map_to_return[keys[0]] = json_term.get(keys[0])
+            file.close()
+        return map_to_return
+
+    def __recover_tweets(self, score):
+        map_to_return = {}
+        for f in listdir(path_data_in):
+            file_in = join(path_data_in, f)
+            if isfile(file_in):
+                with open(file_in, 'r', encoding="utf-8") as file_to_load:
+                    for tweet in file_to_load:
+                        tweet = tweet.rstrip()
+                        json_tweet = json.load(io.StringIO(tweet))
+                        if str(json_tweet.get("id")) in score:
+                            map_to_return[str(
+                                json_tweet.get("id"))] = json_tweet
+                    file_to_load.close()
+        return map_to_return
 
     def score(self, query):
-        pass
+        query = query.lower()
+        query_words = self.tokenizer.tokenize(query)
+        query_map = {}
+        for word in query_words:
+            if word in self.stopList:
+                continue
+            # Especial case:
+            if word[:4] == "http":
+                continue
+            if word[-1] == '.':
+                word = word[:-1]
+            if word[0] == '.':
+                word = word[1:]
+            if '.' in word:
+                pos = word.find('.')
+                rest_word = word[pos+1:]
+                if rest_word != "":
+                    query_words.append(rest_word)
+                word = word[:pos]
+            if 'covid' in word and word[0] == '#':
+                word = '#covid'
+            if 'covid' in word and word[0] != '#':
+                word = 'covid'
+            ###
+            if word == "":
+                continue
+            query_root_word = self.__getStem(word)
+            if query_root_word in query_map:
+                query_map[query_root_word] = query_map[query_root_word] + 1
+            else:
+                query_map[query_root_word] = 1
+
+        score = {}
+        map_terms = self.__search_term_in_data(query_map)
+        list_tweet_id = []
+        for term in map_terms:
+            wtq = log10(1+query_map[term]) * map_terms[term]["idf"]
+            for tweet_id, tf_t_d in map_terms[term]["docs"]:
+                if tweet_id not in score:
+                    list_tweet_id.append(tweet_id)
+                    score[tweet_id] = 0.0
+                wtd = log10(1+tf_t_d) * map_terms[term]["idf"]
+                score[tweet_id] = score[tweet_id] + wtq * wtd
+        map_tweet_norm = self.__search_tweet_norm(list_tweet_id)
+        for tweet_id in score:
+            score[tweet_id] = score[tweet_id] / map_tweet_norm[tweet_id]
+
+        score = dict(
+            sorted(score.items(), key=lambda item: item[1], reverse=True))
+
+        map_tweets = self.__recover_tweets(score)
+        print(len(map_tweets), " tweets recuperados")
+        i = 0
+        for tweet_id in score:
+            print(tweet_id, " -> ", score[tweet_id])
+            print("date:", map_tweets[tweet_id].get("date"))
+            tweet_text = map_tweets[tweet_id].get("text") if map_tweets[tweet_id].get(
+                "RT_text") == None else map_tweets[tweet_id].get("RT_text")
+            print("text:", tweet_text)
+            i = i+1
+            print()
+            if i > 5:
+                break
