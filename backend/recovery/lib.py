@@ -1,4 +1,4 @@
-path_data = "data/"
+path_data = "recovery/data/"
 path_file_data = path_data + "data.json"
 path_data_in = path_data + "data_in/"
 path_stop_list = path_data + "stoplist.txt"

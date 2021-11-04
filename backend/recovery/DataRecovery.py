@@ -1,5 +1,5 @@
 from numpy import sqrt, square
-from lib import *
+from .lib import *
 import json
 import io
 from os import listdir, remove
@@ -324,14 +324,4 @@ class DataRecovery():
 
         map_tweets = self.__recover_tweets(score)
         print(len(map_tweets), " tweets recuperados")
-        i = 0
-        for tweet_id in score:
-            print(tweet_id, " -> ", score[tweet_id])
-            print("date:", map_tweets[tweet_id].get("date"))
-            tweet_text = map_tweets[tweet_id].get("text") if map_tweets[tweet_id].get(
-                "RT_text") == None else map_tweets[tweet_id].get("RT_text")
-            print("text:", tweet_text)
-            i = i+1
-            print()
-            if i > 5:
-                break
+        return map_tweets
