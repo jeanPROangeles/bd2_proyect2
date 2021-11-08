@@ -292,6 +292,9 @@ class DataRecovery():
         return map_to_return
 
     def score(self, query):
+        if self.N == 0:
+            print("No hay tweets procesados")
+            return "No hay tweets procesados"
         query = query.lower()
         query_words = self.tokenizer.tokenize(query)
         query_map = {}
