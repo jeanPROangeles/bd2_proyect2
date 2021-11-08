@@ -1,5 +1,4 @@
 from numpy import sqrt, square
-from .lib import *
 import json
 import io
 from os import listdir, remove
@@ -12,6 +11,33 @@ from nltk.tokenize.toktok import ToktokTokenizer
 # >>> nltk.download('perluniprops')
 # >>> nltk.download('nonbreaking_prefixes')
 from nltk.stem.snowball import SnowballStemmer
+import re
+
+# for backend:
+path_data = "recovery/data/"
+# for test:
+#path_data = "data/"
+
+path_file_data = path_data + "data.json"
+path_data_in = path_data + "data_in/"
+path_stop_list = path_data + "stoplist.txt"
+MAX_TERMS_IN_MAP = 1000000
+MAX_SIZE_OF_PAGE = 10
+path_data_aux = path_data + "data_aux/"
+path_file_aux = path_data + "data_aux/aux"
+path_file_aux_end = ".json"
+path_norm_doc = path_data + "norm.json"
+
+
+def process_word(word):
+    letras = "abcdefghijklmnopqrstuvwxyzñáéíóú"
+    new_word = ""
+    for c in word:
+        if c in letras:
+            new_word = new_word + c
+        else:
+            new_word = new_word + '.'
+    return new_word.strip('.')
 
 
 class DataRecovery():
@@ -20,18 +46,16 @@ class DataRecovery():
     tokenizer = ToktokTokenizer()
     N = 0  # Cantidad de tweets
 
+    map_score = {}
+    list_keys = []
+    map_tweets = {}
+    max_score = 0
+
     def __init__(self):
         self.stopList.clear()
         with open(path_stop_list, 'r', encoding="utf-8") as file:
             self.stopList = [line.lower().strip() for line in file]
             file.close()
-        # TODO: Añadir a N la cantidad de líneas de data/norm.json (tweets que ya fueron procesados)
-        '''
-        with open(path_norm_doc, 'r', encoding="utf-8") as file:
-            num_lines = sum(1 for line in file)
-            self.N = self.N + num_lines
-            file.close()
-        '''
 
     def __getStem(self, word):
         return self.stemmer.stem(word.lower())
@@ -50,7 +74,8 @@ class DataRecovery():
         with open(path_norm_doc, 'a', encoding="utf-8") as file_norm_out:
             sum = 0
             for key in frecuency_map:
-                sum = sum + frecuency_map[key] * frecuency_map[key]
+                sum = sum + \
+                    log10(frecuency_map[key]+1) * log10(frecuency_map[key]+1)
             sum = sqrt(sum)
             file_norm_out.write(json.dumps({id: sum}, ensure_ascii=False))
             file_norm_out.write("\n")
@@ -62,6 +87,8 @@ class DataRecovery():
         return [keys[0], list(item_json.get(keys[0]).items())]
 
     def load(self):
+        tmp = open(path_file_data, 'w').close()
+        tmp = open(path_norm_doc, 'w').close()
         local_map = {}
         size_of_local_map = 0
         id_file_aux = 1
@@ -83,25 +110,18 @@ class DataRecovery():
                         for tweet_word in tweet_words:
                             if tweet_word in self.stopList:
                                 continue
-                            # Especial case:
-                            if tweet_word[:4] == "http":
+                            tweet_word = process_word(tweet_word)
+                            if tweet_word == "":
                                 continue
-                            if tweet_word[-1] == '.':
-                                tweet_word = tweet_word[:-1]
-                            if tweet_word[0] == '.':
-                                tweet_word = tweet_word[1:]
                             if '.' in tweet_word:
                                 pos = tweet_word.find('.')
                                 rest_word = tweet_word[pos+1:]
                                 if rest_word != "":
                                     tweet_words.append(rest_word)
                                 tweet_word = tweet_word[:pos]
-                            if 'covid' in tweet_word and tweet_word[0] == '#':
-                                tweet_word = '#covid'
-                            if 'covid' in tweet_word and tweet_word[0] != '#':
-                                tweet_word = 'covid'
-                            ###
                             if tweet_word == "":
+                                continue
+                            if tweet_word in self.stopList:
                                 continue
                             tweet_word_root = self.__getStem(tweet_word)
                             if tweet_word_root in local_map:
@@ -151,7 +171,6 @@ class DataRecovery():
             number_of_line_buffer.append(2)
             pq.put((read_buffer[i][0], i))
             buffer_remaining.append(i)
-        # TODO: Añadir bufer de lectura de data/data.json
         size2 = 0
         with open(path_file_data, 'a', encoding="utf-8") as file:
             n = 0
@@ -232,6 +251,7 @@ class DataRecovery():
         print("size3:", size3)
         print("N:", self.N)
         '''
+        return "Invert index created. " + str(n) + " términos encontrados. " + str(self.N) + " tweets procesados"
 
     def __search_term_in_data(self, query_map):
         map_to_return = {}
@@ -278,25 +298,18 @@ class DataRecovery():
         for word in query_words:
             if word in self.stopList:
                 continue
-            # Especial case:
-            if word[:4] == "http":
+            word = process_word(word)
+            if word == "":
                 continue
-            if word[-1] == '.':
-                word = word[:-1]
-            if word[0] == '.':
-                word = word[1:]
             if '.' in word:
                 pos = word.find('.')
                 rest_word = word[pos+1:]
                 if rest_word != "":
                     query_words.append(rest_word)
                 word = word[:pos]
-            if 'covid' in word and word[0] == '#':
-                word = '#covid'
-            if 'covid' in word and word[0] != '#':
-                word = 'covid'
-            ###
             if word == "":
+                continue
+            if word in self.stopList:
                 continue
             query_root_word = self.__getStem(word)
             if query_root_word in query_map:
@@ -304,24 +317,56 @@ class DataRecovery():
             else:
                 query_map[query_root_word] = 1
 
-        score = {}
+        self.map_score.clear()
+        self.map_tweets.clear()
+        self.list_keys.clear()
         map_terms = self.__search_term_in_data(query_map)
         list_tweet_id = []
         for term in map_terms:
             wtq = log10(1+query_map[term]) * map_terms[term]["idf"]
             for tweet_id, tf_t_d in map_terms[term]["docs"]:
-                if tweet_id not in score:
+                if tweet_id not in self.map_score:
                     list_tweet_id.append(tweet_id)
-                    score[tweet_id] = 0.0
+                    self.map_score[tweet_id] = 0.0
                 wtd = log10(1+tf_t_d) * map_terms[term]["idf"]
-                score[tweet_id] = score[tweet_id] + wtq * wtd
+                self.map_score[tweet_id] = self.map_score[tweet_id] + wtq * wtd
         map_tweet_norm = self.__search_tweet_norm(list_tweet_id)
-        for tweet_id in score:
-            score[tweet_id] = score[tweet_id] / map_tweet_norm[tweet_id]
+        for tweet_id in self.map_score:
+            self.map_score[tweet_id] = self.map_score[tweet_id] / \
+                map_tweet_norm[tweet_id]
 
-        score = dict(
-            sorted(score.items(), key=lambda item: item[1], reverse=True))
+        self.map_score = dict(
+            sorted(self.map_score.items(), key=lambda item: item[1], reverse=True))
+        self.map_tweets = self.__recover_tweets(self.map_score)
+        print(len(self.map_tweets), " tweets recuperados")
+        self.list_keys = list(self.map_score.keys())
+        if len(self.list_keys) > 0:
+            self.max_score = self.map_score[self.list_keys[0]]
+        else:
+            self.max_score = 0
+        return "Score procesado " + str(len(self.map_tweets)) + " tweets recuperados"
 
-        map_tweets = self.__recover_tweets(score)
-        print(len(map_tweets), " tweets recuperados")
-        return map_tweets
+    def retrieve_k_tweets(self, page_str):
+        page_number = int(page_str)
+        result = {}
+        for i in range((page_number-1)*MAX_SIZE_OF_PAGE, (page_number)*MAX_SIZE_OF_PAGE):
+            if i >= len(self.list_keys):
+                break
+            result_tweet = {}
+            result_tweet['position'] = i
+            result_tweet['score'] = self.map_score[self.list_keys[i]]
+            if self.max_score == 0:
+                result_tweet['relative_score'] = 0
+            else:
+                result_tweet['relative_score'] = self.map_score[self.list_keys[i]
+                                                                ]/self.max_score * 100
+            result_tweet['date'] = self.map_tweets[self.list_keys[i]].get(
+                'date')
+            result_tweet['user_id'] = self.map_tweets[self.list_keys[i]].get(
+                'user_id')
+            result_tweet['user_name'] = self.map_tweets[self.list_keys[i]].get(
+                'user_name')
+            result_tweet['text'] = self.map_tweets[self.list_keys[i]].get(
+                'text')
+            result[self.list_keys[i]] = result_tweet
+        return json.dumps(result, ensure_ascii=False)
