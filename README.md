@@ -16,6 +16,7 @@
     * [Información](#información)
     * [Data Recover](#data-recovery)
     * [Función Init](#función-init)
+    * [Función Load](#función-load)
     * [Función Score](#función-score)
     * [Función Retrieve](#función-retrive)
     * [Backend](#Backend)
@@ -45,16 +46,23 @@ Es una clase que contiene todas las funciones necesarias para procesar los tweet
 
 ### **Función init**
 El constructor de la clase cuenta los términos y tweets guardados en memoria. Además de leer la stoplist proporcionada en stoplist.txt
--- Función load:
+
+### **Función load**
 Vacía los archivos data y norm. Procesa todos los tweets de los archivos de data_in. Para cada tweet, extrae todos los términos usando la librería nltk (clase ToktokTokenizer para español), descarta los stopwords y genera un diccionario para cada término. Cuando este diccionario llega a una cantidad de caracteres definido por una variable global (1 millón por default), se envía a memoria secundaria generando un archivo auxiliar con los términos ordenados. Los archivos auxiliares se guardan en la carpeta data_aux. Para cada tweet procesado, se guarda su norma.
 
 Cuando termina de procesar todos los tweets, realizará el procedimiento de merge para unir todos los archivos auxiliares creados. Mantiene un buffer de lectura de una línea para cada archivo y unifica los términos comunes con un Priority Queue. Esta operación se realiza en O(nlgk) para n términos y k archivos auxiliares generados. Cada término unificado se guarda en data.json.
 
+<img src="src/load.jpeg" width="350">
+
 ### **Función Score**
 Se procesa el query enviado a esta función, se descartan los stopwords, y se traen de la memoria secundaria los términos y tweets relacionados con la query. Luego, utilizamos el score coseno para generar un ranking con los tweets.
 
+<img src="src/score.jpeg" width="350">
+
 ### **Función Retrieve**
 Una vez generado el rankink de tweets, la información se retorna por partes. Esta función debe ser llamada con un parámetro k, la cual indica qué tweets se deben retornar. Para k = 1, se retorna los 10 primeros tweets, para k = 2, los siguientes 10, y así sucesivamente. La cantidad de tweets devueltos por vez es configurable.
+
+<img src="src/retrieve.jpeg" width="350">
 
 ### **Backend**
 Se implementa un backend con ayuda de Flask, y se implementan las 4 funciones detalladas del índice invertido como endpoints de la aplicación.
