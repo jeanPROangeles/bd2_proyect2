@@ -267,10 +267,24 @@ class DataRecovery():
     def __search_term_in_data(self, query_map):
         # query map es un mapa de semanticas con frecuencias
         map_to_return = {}
+        for word in query_map:
+            lo = 1
+            hi = self.Nterms
+            while lo <= hi:
+                mi = (hi + lo) // 2
+                line = linecache.getline(path_file_data, mi).rstrip()
+                term_json = json.load(io.StringIO(line))
+                term_name = term_json.get("name")
+                if term_name < word:
+                    lo = mi + 1
+                elif term_name > word:
+                    hi = mi - 1
+                else:
+                    map_to_return[word] = dict(term_json)
+                    break
+        return map_to_return
+        '''
         with open(path_file_data, 'r', encoding="utf-8") as file:
-            lo = 0
-            hi = 0
-            mi = lo + hi / 2
             for line in file:
                 line = line.rstrip()
                 json_term = json.load(io.StringIO(line))
@@ -278,6 +292,7 @@ class DataRecovery():
                     map_to_return[json_term.get("name")] = dict(json_term)
             file.close()
         return map_to_return
+        '''
 
     def __search_tweet_norm(self, list_tweet_id):
         map_to_return = {}
