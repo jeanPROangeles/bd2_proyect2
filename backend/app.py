@@ -1,23 +1,33 @@
+from types import MethodDescriptorType
 from recovery.DataRecovery import DataRecovery
-from flask import Flask
-app = Flask(__name__)
+from flask import (
+Flask, 
+render_template, 
+request, 
+redirect, 
+url_for, 
+jsonify
+)
+app = Flask(__name__, template_folder= '../frontend/', static_folder = '../frontend/')
 
 
 @app.route("/")
 def state():
-    return dataRecovery.ini()
+    dataRecovery.ini()
+    return  render_template('index.html')
 
 
-@app.route("/load")
+@app.route("/load", methods = ['GET'])
 def load():
     print('load')
-    return dataRecovery.load()
+    dataRecovery.load()
+    return url_for('index')
 
 
-@app.route("/score/<text>")
+@app.route("/score/<text>", methods = ['POST'])
 def score(text):
     print(text)
-    return dataRecovery.score(text)
+    return jsonify({'succes': dataRecovery.score(text)})
 
 
 @app.route("/retrieve/<number>")
@@ -28,4 +38,4 @@ def retrieve(number):
 
 if __name__ == '__main__':
     dataRecovery = DataRecovery()
-    app.run()
+    app.run(debug = True, port = 5050)
