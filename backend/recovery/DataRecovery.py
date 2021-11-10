@@ -45,6 +45,7 @@ class DataRecovery():
     stemmer = SnowballStemmer('spanish')
     tokenizer = ToktokTokenizer()
     N = 0  # Cantidad de tweets
+    Nterms = 0  # Cantidad de terminos
 
     map_score = {}
     list_keys = []
@@ -59,6 +60,12 @@ class DataRecovery():
         with open(path_norm_doc, 'r', encoding="utf-8") as file:
             self.N = sum(1 for line in file)
             file.close()
+        with open(path_file_data, 'r', encoding="utf-8") as file:
+            self.Nterms = sum(1 for line in file)
+            file.close()
+
+    def ini(self):
+        return "Hay en memoria " + str(self.Nterms) + " términos y " + str(self.N) + " tweets procesados"
 
     def __getStem(self, word):
         return self.stemmer.stem(word.lower())
@@ -96,6 +103,7 @@ class DataRecovery():
         size_of_local_map = 0
         id_file_aux = 1
         size = 0
+        self.N = 0
         print("Generando archivos auxiliares")
         for f in listdir(path_data_in):
             file_in = join(path_data_in, f)
@@ -175,8 +183,8 @@ class DataRecovery():
             pq.put((read_buffer[i][0], i))
             buffer_remaining.append(i)
         size2 = 0
+        self.Nterms = 0
         with open(path_file_data, 'a', encoding="utf-8") as file:
-            n = 0
             while not pq.empty():
                 # Ver buffers y remaining buffers
                 '''
@@ -231,10 +239,10 @@ class DataRecovery():
                 size2 = size2 + len(term_dic["docs"])
                 file.write(json.dumps(term_dic, ensure_ascii=False))
                 file.write("\n")
-                n = n + 1
+                self.Nterms = self.Nterms + 1
             # print("n: ", n)
             file.close()
-        print(str(n) +
+        print(str(self.Nterms) +
               " términos encontrados")
         print(str(self.N) +
               " tweets procesados")
@@ -254,11 +262,15 @@ class DataRecovery():
         print("size3:", size3)
         print("N:", self.N)
         '''
-        return "Invert index created. " + str(n) + " términos encontrados. " + str(self.N) + " tweets procesados"
+        return "Invert index created. " + str(self.Nterms) + " términos encontrados. " + str(self.N) + " tweets procesados"
 
     def __search_term_in_data(self, query_map):
+        # query map es un mapa de semanticas con frecuencias
         map_to_return = {}
         with open(path_file_data, 'r', encoding="utf-8") as file:
+            lo = 0
+            hi = 0
+            mi = lo + hi / 2
             for line in file:
                 line = line.rstrip()
                 json_term = json.load(io.StringIO(line))
