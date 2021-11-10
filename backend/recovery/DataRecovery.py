@@ -16,7 +16,7 @@ import re
 # for backend:
 path_data = "recovery/data/"
 # for test:
-#path_data = "data/"
+# path_data = "data/"
 
 path_file_data = path_data + "data.json"
 path_data_in = path_data + "data_in/"
@@ -55,6 +55,9 @@ class DataRecovery():
         self.stopList.clear()
         with open(path_stop_list, 'r', encoding="utf-8") as file:
             self.stopList = [line.lower().strip() for line in file]
+            file.close()
+        with open(path_norm_doc, 'r', encoding="utf-8") as file:
+            self.N = sum(1 for line in file)
             file.close()
 
     def __getStem(self, word):
@@ -229,7 +232,7 @@ class DataRecovery():
                 file.write(json.dumps(term_dic, ensure_ascii=False))
                 file.write("\n")
                 n = n + 1
-            #print("n: ", n)
+            # print("n: ", n)
             file.close()
         print(str(n) +
               " términos encontrados")
