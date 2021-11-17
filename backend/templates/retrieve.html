@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Twitter</title>
+    <link real="stylesheet" type="text/css" href="{{ url_for('fronted', filename='estilo.css') }}">
+</head>
+<body>
+    <section>
+    
+        <p retrieve_k_tweets class="date"> Publicado en:{{ retrieve_k_tweets.date.strftime('%m/%d/%Y') }}</p>
+        <p retrieve_k_tweets class="text">{{ result_tweet.text }}</p>
+    
+    
+    </section>
+</body>
+</html>
