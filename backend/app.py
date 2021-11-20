@@ -27,13 +27,19 @@ def load():
 @app.route("/score/<text>", methods = ['POST'])
 def score(text):
     print(text)
-    return jsonify({'succes': dataRecovery.score(text)})
+    n = 1
+    dataRecovery.score(text)
+    #jsonify({'succes': dataRecovery.score(text)}),
+    return  redirect(url_for('retrieve', number = n))
 
 
-@app.route("/retrieve/<number>")
+@app.route("/retrieve/<number>", methods = ['GET'])
 def retrieve(number):
     print(number)
-    return dataRecovery.retrieve_k_tweets(number)
+    #return dataRecovery.retrieve_k_tweets(number)
+    #print(data)
+    return render_template('retrieve.html', content = dataRecovery.retrieve_k_tweets(number))
+
 
 
 if __name__ == '__main__':
