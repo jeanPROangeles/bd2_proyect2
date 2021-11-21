@@ -1,5 +1,9 @@
 from numpy import sqrt, square
 import json
+from flask import (
+Flask, 
+jsonify
+)
 import io
 from os import listdir, remove
 from os.path import isfile, join
@@ -402,4 +406,4 @@ class DataRecovery():
             result_tweet['text'] = self.map_tweets[self.list_keys[i]].get(
                 'text')
             result[self.list_keys[i]] = result_tweet
-        return json.dumps(result, separators=(',', ':'), ensure_ascii=False)
+        return result.values()

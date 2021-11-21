@@ -5,13 +5,18 @@
     <link real="stylesheet" type="text/css" href="{{ url_for('static', filename='/estilo.css') }}">
 </head>
 <body>
-    <form method = "GET" action = "http://localhost:5000" data-geocode = '{{obj|tojson}}'>
-    <script>
-        const objeto = JSON.stringify({{obj}});
-        console.log(objeto);
-    </script>
-        <li>{{ obj }}</li>
-
+    <form method = "GET" action = "http://localhost:5000" >
+        <ul>
+            {% for item in obj %}
+                <li> Id del usuario: {{ item.user_id }}
+                    <div>Score: {{ item.score }}</div>
+                    <div>Posición: {{ item.position }}</div>
+                    <div>Fecha: {{ item.date }}</div>
+                    <div>Texto: {{ item.text }}</div>
+                </li>
+                <br>
+            {% endfor %}
+            </ul>
     </form>
 </body>
 </html>

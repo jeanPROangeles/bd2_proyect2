@@ -37,8 +37,8 @@ def score(text):
 def retrieve(number):
     print(number)
     #return dataRecovery.retrieve_k_tweets(number)
-    #print(data)
-    return render_template('retrieve.html', obj = dataRecovery.retrieve_k_tweets(number))
+    data = dataRecovery.retrieve_k_tweets(number)
+    return render_template('retrieve.html', obj = data)
 
 
 
