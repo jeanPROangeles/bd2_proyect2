@@ -390,6 +390,7 @@ class DataRecovery():
             if i >= len(self.list_keys):
                 break
             result_tweet = {}
+            result_tweet['tweet_id'] = self.list_keys[i]
             result_tweet['position'] = i
             result_tweet['score'] = self.map_score[self.list_keys[i]]
             if self.max_score == 0:
