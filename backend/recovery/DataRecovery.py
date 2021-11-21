@@ -402,4 +402,4 @@ class DataRecovery():
             result_tweet['text'] = self.map_tweets[self.list_keys[i]].get(
                 'text')
             result[self.list_keys[i]] = result_tweet
-        return json.dumps(result, ensure_ascii=False)
+        return json.dumps(result, separators=(',', ':'), ensure_ascii=False)

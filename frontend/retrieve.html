@@ -5,7 +5,13 @@
     <link real="stylesheet" type="text/css" href="{{ url_for('static', filename='/estilo.css') }}">
 </head>
 <body>
-    <form method = "GET" action = "http://localhost:5000">  
-        <li>Hola</li>
+    <form method = "GET" action = "http://localhost:5000" data-geocode = '{{obj|tojson}}'>
+    <script>
+        const objeto = JSON.stringify({{obj}});
+        console.log(objeto);
+    </script>
+        <li>{{ obj }}</li>
+
+    </form>
 </body>
 </html>

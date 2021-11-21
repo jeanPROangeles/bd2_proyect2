@@ -38,7 +38,7 @@ def retrieve(number):
     print(number)
     #return dataRecovery.retrieve_k_tweets(number)
     #print(data)
-    return render_template('retrieve.html', content = dataRecovery.retrieve_k_tweets(number))
+    return render_template('retrieve.html', obj = dataRecovery.retrieve_k_tweets(number))
 
 
 

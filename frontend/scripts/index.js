@@ -9,7 +9,10 @@ document.getElementById('form').onsubmit = function(e){
             'Content-Type' : 'application/json'
         }
     })
-
+    .then(function(response){
+        window.location.href = 'http://127.0.0.1:5050/retrieve/1';
+        return response.json();
+    });
 }
 
 
