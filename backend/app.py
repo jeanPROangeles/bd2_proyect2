@@ -58,4 +58,4 @@ if __name__ == '__main__':
     dataRecovery = DataRecovery()
     app.run(debug = True, port = 5050)
     app.add_url_rule('/favicon.ico',
-                 redirect_to=url_for('static', filename='src/favicon.ico'))
+                 redirect_to=url_for('static', filename='src/logoico.png'))
