@@ -70,7 +70,7 @@ Se implementa un backend con ayuda de Flask, y se implementan las 4 funciones de
 
 ## **Frontend**
 
-Dentro del frontend se hiso uso de 4 tecnologías, tales como HTML, CSS, JavaScript y Bootstrap.
+Dentro del frontend se hiso uso de 4 tecnologías, tales como HTML, CSS, JavaScript y Bootstrap, para facilitar la interacción del usuario al momento de realizar las búsquedas, por lo que se buscó asemejar la primera vista como una ventana de los motores de búsqueda actuales.
 
 ### **HTML y CSS**
 Sirvió como estructura principal de las páginas para darles forma y hacer la ventana principal donde se ingresan la búsquedas, asi como en la página de resultados.
