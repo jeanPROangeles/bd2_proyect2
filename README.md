@@ -75,11 +75,15 @@ Dentro del frontend se hiso uso de 4 tecnologías, tales como HTML, CSS, JavaScr
 ### **HTML y CSS**
 Sirvió como estructura principal de las páginas para darles forma y hacer la ventana principal donde se ingresan la búsquedas, asi como en la página de resultados.
 
+<img src="src/principal.png" width="450">
+
 ### **JavaScript**
 Se utilizó para comunicar la parte del frontend, con el envio de las querys hacia flask y retornar resultado hacias la página de resultados. Asimismo, permitió controlar los resultados que se muestran acorde a la cantidad fijada que es de 10, por lo que ahi se implementó las funciones de validación, para que no existan errores en la navegación del usuario.
 
 ### **Bootstrap**
 Se le dió uso para el formato de tarjetas en las que se muestran los resultados.
+
+<img src="src/result.png" width="450">
 
 
 # **Pruebas**
