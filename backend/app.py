@@ -6,8 +6,10 @@ render_template,
 request, 
 redirect, 
 url_for, 
-jsonify
+jsonify,
+send_from_directory
 )
+import os
 app = Flask(__name__, template_folder= '../frontend/', static_folder = '../frontend/')
 
 
@@ -47,8 +49,13 @@ def retrieve(number, query):
         return redirect(url_for('retrieve', number = 1, query = palabra))
     return render_template('retrieve.html', obj = data, word = palabra, Npage = page)
 
-
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, 'static'),
+                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 if __name__ == '__main__':
     dataRecovery = DataRecovery()
     app.run(debug = True, port = 5050)
+    app.add_url_rule('/favicon.ico',
+                 redirect_to=url_for('static', filename='src/favicon.ico'))
