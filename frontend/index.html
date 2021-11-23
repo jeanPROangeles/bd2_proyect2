@@ -4,25 +4,26 @@
   <meta charset="utf-8">
   <title>GooTec</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="estilo.css">
+  <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='/estilo.css') }}">
 </head>
 
 <body>
 <div class = "general">
-  <img src = "src/Logo.png">
-  <form class = "form" action = "/search" method="GET">
+  <img src = "../frontend/src/Logo.png">
+  <form id = "form" class = "form">
   
     <div class = "generalquery">
-        <div class = "img"><img src = "src/icone-loupe-gris.png" width="20"></div>
-        <div class = "query"><input class = "querybox" type = "text" name = "query" title = "query" label = "query"></div>
+        <div class = "img"><img src = "../frontend/src/icone-loupe-gris.png" width="20"></div>
+        <div class = "query"><input id = "query" class = "querybox" type = "text" name = "query" title = "Búsqueda" label = "query" required></div>
         <div class = "img1"> </div>
     </div>
+    <script src = "../frontend/scripts/index.js" ></script>
     
     <div class = "botones">
-      <button class = "search b1">Buscar con GooTec</button>
-      <button class = "search b2">Me siento con suerte</button>
+      <button type = "submit" class = "search b1">Buscar con GooTec</button>
+
     </div>
-  </form>
+  </form> 
 </div>
 </body>
 </html>

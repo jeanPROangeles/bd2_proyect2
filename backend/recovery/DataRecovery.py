@@ -1,5 +1,9 @@
 from numpy import sqrt, square
 import json
+from flask import (
+Flask, 
+jsonify
+)
 import io
 from os import listdir, remove
 from os.path import isfile, join
@@ -377,7 +381,7 @@ class DataRecovery():
             self.max_score = self.map_score[self.list_keys[0]]
         else:
             self.max_score = 0
-        return "Score procesado " + str(len(self.map_tweets)) + " tweets recuperados"
+        return len(self.map_tweets)
 
     def retrieve_k_tweets(self, page_str):
         page_number = int(page_str)
@@ -386,6 +390,7 @@ class DataRecovery():
             if i >= len(self.list_keys):
                 break
             result_tweet = {}
+            result_tweet['tweet_id'] = self.list_keys[i]
             result_tweet['position'] = i
             result_tweet['score'] = self.map_score[self.list_keys[i]]
             if self.max_score == 0:
@@ -402,4 +407,6 @@ class DataRecovery():
             result_tweet['text'] = self.map_tweets[self.list_keys[i]].get(
                 'text')
             result[self.list_keys[i]] = result_tweet
-        return json.dumps(result, ensure_ascii=False)
+            if(len(result.keys()) <= 0):
+                return None
+        return result.values()
