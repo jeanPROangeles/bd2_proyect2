@@ -24,9 +24,6 @@
       * [HTML y CSS](#html-y-css)
       * [JavaScript](#javascript)
       * [Bootstrap](#bootstrap)
-* [Resultados](#resultados)
-  * [Tiempo de ejecución](#tiempo-de-ejecución)
-  * [Gráficos de comparación](#gráficos-de-comparación)
 * [Pruebas y video del proyecto](#pruebas)
 
 # **Introducción**
